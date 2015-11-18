@@ -5,17 +5,20 @@
     "newStorageAccountName": {
       "value": "uniqueStorageAccount"
     },
+    "location": {
+      "value": "West US"
+    },
     "adminUsername": {
       "value": "userName"
     },
     "adminPassword": {
       "value": "password"
     },
-    "dnsNameForPublicIP": {
-      "value": "uniqueDNS"
-    },
     "mySqlPassword": {
       "value": "password"
+    },
+    "namePrefix": {
+      "value": "uniqueDNS"
     },
     "webVMCount": {
         "value": 1
