@@ -108,7 +108,7 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
     "installScriptName": "install_openldap.sh",
     "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/openldap-singlevm-ubuntu/', variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', parameters('location'), ' ', parameters('organization'))]",
+    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'))]",
     "apiVersion": "2015-06-15"
   },
   "resources": [
