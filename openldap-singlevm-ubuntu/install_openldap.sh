@@ -37,7 +37,12 @@ echo "\$servers->setValue('server','name','$organization');" >> /etc/phpldapadmi
 echo "\$servers->setValue('server','host','$domain');" >> /etc/phpldapadmin/config.php
 echo "\$servers->setValue('server','base',array('dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com'));" >> /etc/phpldapadmin/config.php
 echo "\$servers->setValue('login','bind_id','cn=admin,dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com');" >> /etc/phpldapadmin/config.php
+echo "\$config->custom->appearance['hide_template_warning'] = true;" >> /etc/phpldapadmin/config.php
 echo "?>" >> /etc/phpldapadmin/config.php
+
+# backup existing /usr/share/phpldapadmin/lib/TemplateRender.php and change password_hash to password_hash_custom (to take care of template error)
+cp /usr/share/phpldapadmin/lib/TemplateRender.php /usr/share/phpldapadmin/lib/TemplateRender.php.old
+sed -i "s/password_hash/password_hash_custom/" /usr/share/phpldapadmin/lib/TemplateRender.php
 
 # restart Apache
 apachectl restart
