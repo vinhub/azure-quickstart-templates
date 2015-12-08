@@ -127,7 +127,7 @@
     "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_openldap.sh",
-    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-singlevm-ubuntu/', variables('installScriptName'))]",
+    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-cluster-ubuntu/', variables('installScriptName'))]",
     "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization') ' ',  parameters('vmCount'))]",
     "apiVersion": "2015-06-15"
   },
