@@ -47,5 +47,27 @@ echo "?>" >> /etc/phpldapadmin/config.php
 cp /usr/share/phpldapadmin/lib/TemplateRender.php /usr/share/phpldapadmin/lib/TemplateRender.php.old
 sed -i "s/password_hash/password_hash_custom/" /usr/share/phpldapadmin/lib/TemplateRender.php
 
+# set up replication
+apt-get -y install ntp
+/etc/init.d/ntp restart
+
+# create entries in hosts file
+# nano /etc/hosts
+# 10.0.0.1 ldap1.local ldap1
+# 10.0.0.2 ldap2.local ldap2
+# 10.0.0.3 ldap3.local ldap3
+
+# modify slapd default configuration
+# /etc/default/slapd
+# SLAPD_SERVICES="ldapi:// ldap://ldap1.local"
+
+# generate password
+SLAPPASSWD=$(slappasswd -s $adminpass)
+
+# modify ldap config
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f myFileToExecute.ldif
+
+# Add database replication
+
 # restart Apache
 apachectl restart

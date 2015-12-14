@@ -254,8 +254,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8080,
-              "backendPort": 8080,
+              "frontendPort": 8000,
+              "backendPort": 80,
               "enableFloatingIP": false
             }
           },
@@ -278,8 +278,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8081,
-              "backendPort": 8080,
+              "frontendPort": 8001,
+              "backendPort": 80,
               "enableFloatingIP": false
             }
           },
@@ -302,8 +302,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8082,
-              "backendPort": 8080,
+              "frontendPort": 8002,
+              "backendPort": 80,
               "enableFloatingIP": false
             }
           },
@@ -326,8 +326,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8083,
-              "backendPort": 8080,
+              "frontendPort": 8003,
+              "backendPort": 80,
               "enableFloatingIP": false
             }
           },
@@ -350,8 +350,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8084,
-              "backendPort": 8080,
+              "frontendPort": 8004,
+              "backendPort": 80,
               "enableFloatingIP": false
             }
           },
@@ -465,11 +465,13 @@
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
         "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.2",
+        "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
             "[variables('installScriptUri')]"
           ],
+        },
+        "protectedSettings": {
           "commandToExecute": "[variables('installCommand')]"
         }
       },
