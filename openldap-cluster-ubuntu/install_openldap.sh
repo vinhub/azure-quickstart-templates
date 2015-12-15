@@ -51,6 +51,8 @@ cp /usr/share/phpldapadmin/lib/TemplateRender.php /usr/share/phpldapadmin/lib/Te
 sed -i "s/password_hash/password_hash_custom/" /usr/share/phpldapadmin/lib/TemplateRender.php
 
 # set up replication
+
+# install ntp package
 apt-get -y install ntp
 /etc/init.d/ntp restart
 
@@ -66,10 +68,71 @@ sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\
 # generate password
 SLAPPASSWD=$(slappasswd -s $adminpass)
 
-# modify ldap config
-ldapmodify -Y EXTERNAL -H ldapi:/// -f 1_loadSyncProvModule.ldif
+# load syncProv module
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1_loadSyncProvModule.ldif
 
-# Add database replication
+# set server ID
+sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
+
+# set password
+sed -i "s/{password}/$SLAPPASSWD/" config_3_setConfigPW.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
+
+# add Root DN
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3a_addOlcRootDN.ldif
+
+# add configuration replication
+for i in `seq 1 $vmCount`; do
+    echo "olcServerID: $i ldap://ldap$i.local" >> config_4_addConfigReplication.ldif
+done
+
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_4_addConfigReplication.ldif
+
+# add syncProv to the configuration
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_5_addSyncProv.ldif
+
+# add syncRepl among servers
+let syncRepl=""
+for i in `seq 1 $vmCount`; do
+    let syncRepl+="olcSyncRepl: rid=00$i provider=ldap://ldap$i.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
+done
+
+sed -i "s/{syncRepl}/$syncRepl/" config_6_addSyncRepl.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
+
+# test replication
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f config_7_testConfigReplication.ldif
+
+# modify HDB config
+
+# add syncProv to HDB
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_1_addSyncProvToHDB.ldif
+
+# add suffix
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_2_addOlcSuffix.ldif
+
+# add Root DN
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_3_addOlcRootDN.ldif
+
+# add Root password
+sed -i "s/{password}/$SLAPPASSWD/" hdb_4_addOlcRootPW.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
+
+# add  syncRepl among servers
+let syncRepl=""
+for i in `seq 1 $vmCount`; do
+    let syncRepl+="olcSyncRepl: rid=10$i provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1\n"
+done
+
+echo $syncRepl >> hdb_5_addOlcSyncRepl.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_5_addOlcSyncRepl.ldif
+
+# add mirror mode
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_6_addOlcMirrorMode.ldif
+
+# add index to the database
+ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_7_addIndexHDB.ldif
 
 # restart Apache
 apachectl restart

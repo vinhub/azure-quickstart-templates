@@ -129,7 +129,8 @@
     "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_openldap.sh",
-    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-cluster-ubuntu/', variables('installScriptName'))]",
+    "fileUriBase": "https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-cluster-ubuntu/",
+    "installScriptUri": "[concat(variables('fileUriBase'), variables('installScriptName'))]",
     "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',
       variables('privateIPAddressPrefix'), ' ', parameters('vmCount'))]",
     "apiVersion": "2015-06-15"
@@ -471,7 +472,22 @@
         "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "[variables('installScriptUri')]"
+            "[variables('installScriptUri')]",
+            "[concat(variables('fileUriBase'), 'config_1_loadSyncProvModule.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_2_setServerID.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_3_setConfigPW.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_3a_addOlcRootDN.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_4_addConfigReplication.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_5_addSyncProv.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_6_addSyncRepl.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_7_testConfigReplication.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_1_addSyncProvToHDB.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_2_addOlcSuffix.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_3_addOlcRootDN.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_4_addOlcRootPW.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_5_addOlcSyncRepl.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_6_addOlcMirrorMode.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_7_addIndexHDB.ldif')]"
           ],
         },
         "protectedSettings": {

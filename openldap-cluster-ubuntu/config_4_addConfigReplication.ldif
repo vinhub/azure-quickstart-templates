@@ -1,6 +1,3 @@
 dn: cn=config
 changetype: modify
 replace: olcServerID
-olcServerID: 1 ldap://ldap1.gremaud.local
-olcServerID: 2 ldap://ldap2.gremaud.local
-olcServerID: 3 ldap://ldap3.gremaud.local
