@@ -11,6 +11,7 @@ index=$7
 
 # variables
 domain=$subdomain.$location.cloudapp.azure.com
+let index=index+1 # index is 0-based, but we want 1-based
 
 # install debconf
 apt-get -y update
@@ -93,12 +94,12 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f config_4_addConfigReplication.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_5_addSyncProv.ldif
 
 # add syncRepl among servers
-let syncRepl=""
+syncRepl=""
 for i in `seq 1 $vmCount`; do
-    let syncRepl+="olcSyncRepl: rid=00$i provider=ldap://ldap$i.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
+    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
 done
 
-sed -i "s/{syncRepl}/$syncRepl/" config_6_addSyncRepl.ldif
+sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
 
 # test replication
@@ -120,9 +121,9 @@ sed -i "s/{password}/$SLAPPASSWD/" hdb_4_addOlcRootPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
 
 # add  syncRepl among servers
-let syncRepl=""
+syncRepl=""
 for i in `seq 1 $vmCount`; do
-    let syncRepl+="olcSyncRepl: rid=10$i provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1\n"
+    syncRepl=$syncRepl"olcSyncRepl: rid=10$i provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1\n"
 done
 
 echo $syncRepl >> hdb_5_addOlcSyncRepl.ldif
