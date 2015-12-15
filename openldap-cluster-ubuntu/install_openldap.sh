@@ -5,6 +5,9 @@ adminpass=$1
 subdomain=$2
 location=$3
 organization=$4
+privateIPAddressPrefix=$5
+vmCount=$6
+index=$7
 
 # variables
 domain=$subdomain.$location.cloudapp.azure.com
@@ -52,20 +55,19 @@ apt-get -y install ntp
 /etc/init.d/ntp restart
 
 # create entries in hosts file
-# nano /etc/hosts
-# 10.0.0.1 ldap1.local ldap1
-# 10.0.0.2 ldap2.local ldap2
-# 10.0.0.3 ldap3.local ldap3
+for i in `seq 1 $vmCount`; do
+    let j=i-1
+    echo "$privateIPAddressPrefix$j ldap$i.local ldap$i" >> /etc/hosts
+done
 
 # modify slapd default configuration
-# /etc/default/slapd
-# SLAPD_SERVICES="ldapi:// ldap://ldap1.local"
+sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\/\/ ldap:\/\/ldap$index.local\/\"/" /etc/default/slapd
 
 # generate password
 SLAPPASSWD=$(slappasswd -s $adminpass)
 
 # modify ldap config
-# ldapmodify -Y EXTERNAL -H ldapi:/// -f myFileToExecute.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f 1_loadSyncProvModule.ldif
 
 # Add database replication
 

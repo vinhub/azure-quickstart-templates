@@ -1,0 +1,6 @@
+dn: olcDatabase={1}hdb,cn=config
+changetype: modify
+add: olcSyncRepl
+olcSyncRepl: rid=101 provider=ldap://ldap1.gremaud.local binddn="cn=admin,dc=gremaud,dc=local" bindmethod=simple credentials=secret searchbase="dc=gremaud,dc=local" type=refreshAndPersist interval=00:00:00:10 retry="5 5 300 5" timeout=1
+olcSyncRepl: rid=102 provider=ldap://ldap2.gremaud.local binddn="cn=admin,dc=gremaud,dc=local" bindmethod=simple credentials=secret searchbase="dc=gremaud,dc=local" type=refreshAndPersist interval=00:00:00:10 retry="5 5 300 5" timeout=1
+olcSyncRepl: rid=103 provider=ldap://ldap3.gremaud.local binddn="cn=admin,dc=gremaud,dc=local" bindmethod=simple credentials=secret searchbase="dc=gremaud,dc=local" type=refreshAndPersist interval=00:00:00:10 retry="5 5 300 5" timeout=1

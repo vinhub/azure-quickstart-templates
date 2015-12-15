@@ -111,7 +111,8 @@
     "nicName": "[concat(parameters('namePrefix'),'Nic')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
-    "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.0.1.0/24",
+    "privateIPAddressPrefix": "10.0.1.1",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat(parameters('namePrefix'),'IP')]",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
@@ -129,7 +130,8 @@
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_openldap.sh",
     "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-cluster-ubuntu/', variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',  parameters('vmCount'))]",
+    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',
+      variables('privateIPAddressPrefix'), ' ', parameters('vmCount'))]",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -196,7 +198,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress" :"[concat(variables('privateIPAddressPrefix'), copyindex())]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               },
@@ -254,8 +257,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8000,
-              "backendPort": 80,
+              "frontendPort": 8080,
+              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -278,8 +281,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8001,
-              "backendPort": 80,
+              "frontendPort": 8081,
+              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -302,8 +305,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8002,
-              "backendPort": 80,
+              "frontendPort": 8082,
+              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -326,8 +329,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8003,
-              "backendPort": 80,
+              "frontendPort": 8083,
+              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -350,8 +353,8 @@
                 "id":"[variables('frontEndIPConfigID')]"
               },
               "protocol": "tcp",
-              "frontendPort": 8004,
-              "backendPort": 80,
+              "frontendPort": 8084,
+              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -472,7 +475,7 @@
           ],
         },
         "protectedSettings": {
-          "commandToExecute": "[variables('installCommand')]"
+          "commandToExecute": "[concat(variables('installCommand'), ' ', copyIndex())]"
         }
       },
       "copy": {
