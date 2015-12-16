@@ -11,7 +11,7 @@ index=$7
 
 # variables
 domain=$subdomain.$location.cloudapp.azure.com
-let index=index+1 # index is 0-based, but we want 1-based
+let "index=index+1" # index is 0-based, but we want 1-based
 
 # install debconf
 apt-get -y update
@@ -121,12 +121,11 @@ sed -i "s/{password}/$SLAPPASSWD/" hdb_4_addOlcRootPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
 
 # add  syncRepl among servers
-syncRepl=""
 for i in `seq 1 $vmCount`; do
-    syncRepl=$syncRepl"olcSyncRepl: rid=10$i provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1\n"
+    let "rid=i+vmCount"
+    echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
 done
 
-echo $syncRepl >> hdb_5_addOlcSyncRepl.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_5_addOlcSyncRepl.ldif
 
 # add mirror mode
