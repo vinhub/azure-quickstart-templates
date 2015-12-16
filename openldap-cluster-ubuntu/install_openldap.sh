@@ -11,7 +11,7 @@ index=$7
 
 # variables
 domain=$subdomain.$location.cloudapp.azure.com
-let "index=index+1" # index is 0-based, but we want 1-based
+let "index+=1" # index is 0-based, but we want 1-based
 
 # install debconf
 apt-get -y update
@@ -59,7 +59,7 @@ apt-get -y install ntp
 
 # create entries in hosts file
 for i in `seq 1 $vmCount`; do
-    let j=i-1
+    let "j=i-1"
     echo "$privateIPAddressPrefix$j ldap$i.local ldap$i" >> /etc/hosts
 done
 

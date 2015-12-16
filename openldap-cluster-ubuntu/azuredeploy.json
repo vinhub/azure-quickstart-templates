@@ -131,7 +131,7 @@
     "installScriptName": "install_openldap.sh",
     "fileUriBase": "https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-cluster-ubuntu/",
     "installScriptUri": "[concat(variables('fileUriBase'), variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',
+    "installCommand": "[concat('bash ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',
       variables('privateIPAddressPrefix'), ' ', parameters('vmCount'))]",
     "apiVersion": "2015-06-15"
   },
