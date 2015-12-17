@@ -77,7 +77,7 @@ sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
 
 # set password
-sed -i "s/{password}/$SLAPPASSWD/" config_3_setConfigPW.ldif
+sed -i "s@{password}@$SLAPPASSWD@" config_3_setConfigPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
 
 # add Root DN
@@ -117,7 +117,7 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_2_addOlcSuffix.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_3_addOlcRootDN.ldif
 
 # add Root password
-sed -i "s/{password}/$SLAPPASSWD/" hdb_4_addOlcRootPW.ldif
+sed -i "s@{password}@$SLAPPASSWD@" hdb_4_addOlcRootPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
 
 # add  syncRepl among servers
