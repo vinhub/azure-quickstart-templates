@@ -17,6 +17,7 @@ let "index+=1" # index is 0-based, but we want 1-based
 apt-get -y update
 apt-get install debconf
 
+echo "===== Set up siltent install of slapd ====="
 # silent install of slapd
 export DEBIAN_FRONTEND=noninteractive
 echo slapd slapd/password1 password $adminpass | debconf-set-selections
@@ -30,11 +31,14 @@ echo slapd slapd/purge_database boolean false | debconf-set-selections
 echo slapd shared/organization string $organization | debconf-set-selections
 echo slapd slapd/backend select HDB | debconf-set-selections
 
+echo "===== Install slapd ====="
 apt-get -y install slapd ldap-utils
 
+echo "===== Install phpldapadmin ====="
 # install phpldapadmin
 sudo apt-get -y install phpldapadmin
 
+echo "===== Configure phpldapadmin ====="
 # backup existing config.php file for phpldapadmin and create a new one
 cp /etc/phpldapadmin/config.php /etc/phpldapadmin/config.php.old
 echo "<?php " > /etc/phpldapadmin/config.php
@@ -51,49 +55,49 @@ echo "?>" >> /etc/phpldapadmin/config.php
 cp /usr/share/phpldapadmin/lib/TemplateRender.php /usr/share/phpldapadmin/lib/TemplateRender.php.old
 sed -i "s/password_hash/password_hash_custom/" /usr/share/phpldapadmin/lib/TemplateRender.php
 
-# set up replication
+echo "===== Set up master-master replication ====="
 
-# install ntp package
+echo "===== Install ntp package ====="
 apt-get -y install ntp
 /etc/init.d/ntp restart
 
-# create entries in hosts file
+echo "===== Create entries in hosts file ====="
 for i in `seq 1 $vmCount`; do
     let "j=i-1"
     echo "$privateIPAddressPrefix$j ldap$i.local ldap$i" >> /etc/hosts
 done
 
-# modify slapd default configuration
+echo "===== Modify slapd default configuration ====="
 sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\/\/ ldap:\/\/ldap$index.local\/\"/" /etc/default/slapd
 
-# generate password
+echo "===== Generate password ====="
 SLAPPASSWD=$(slappasswd -s $adminpass)
 
-# load syncProv module
+echo "===== Load syncProv module ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1_loadSyncProvModule.ldif
 
-# set server ID
+echo "===== Set server ID ====="
 sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
 
-# set password
+echo "===== Set password ====="
 sed -i "s@{password}@$SLAPPASSWD@" config_3_setConfigPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
 
-# add Root DN
+echo "===== Add Root DN ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3a_addOlcRootDN.ldif
 
-# add configuration replication
+echo "===== Add configuration replication ====="
 for i in `seq 1 $vmCount`; do
     echo "olcServerID: $i ldap://ldap$i.local" >> config_4_addConfigReplication.ldif
 done
 
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_4_addConfigReplication.ldif
 
-# add syncProv to the configuration
+echo "===== Add syncProv to the configuration ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_5_addSyncProv.ldif
 
-# add syncRepl among servers
+echo "===== Add syncRepl among servers ====="
 syncRepl=""
 for i in `seq 1 $vmCount`; do
     syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
@@ -105,22 +109,22 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
 # test replication
 # ldapmodify -Y EXTERNAL -H ldapi:/// -f config_7_testConfigReplication.ldif
 
-# modify HDB config
+echo "===== Modify HDB config ====="
 
-# add syncProv to HDB
+echo "===== Add syncProv to HDB ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_1_addSyncProvToHDB.ldif
 
-# add suffix
+echo "===== Add suffix ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_2_addOlcSuffix.ldif
 
-# add Root DN
+echo "===== Add Root DN ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_3_addOlcRootDN.ldif
 
-# add Root password
+echo "===== Add Root password ====="
 sed -i "s@{password}@$SLAPPASSWD@" hdb_4_addOlcRootPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
 
-# add  syncRepl among servers
+echo "===== Add  syncRepl among servers ====="
 for i in `seq 1 $vmCount`; do
     let "rid=i+vmCount"
     echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.local binddn=\"cn=admin,dc=local\" bindmethod=simple credentials=secret searchbase=\"dc=local\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
@@ -128,11 +132,11 @@ done
 
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_5_addOlcSyncRepl.ldif
 
-# add mirror mode
+echo "===== Add mirror mode ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_6_addOlcMirrorMode.ldif
 
-# add index to the database
+echo "===== Add index to the database ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_7_addIndexHDB.ldif
 
-# restart Apache
+echo "===== Restart Apache ====="
 apachectl restart
