@@ -211,9 +211,6 @@
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/Web-VM',copyindex())]"
-                },
-                {
                   "id": "[concat(variables('lbID'),'/inboundNatRules/SSH-VM',copyindex())]"
                 }
               ]
