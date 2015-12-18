@@ -97,15 +97,6 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f config_4_addConfigReplication.ldif
 echo "===== Add syncProv to the configuration ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_5_addSyncProv.ldif
 
-echo "===== Add syncRepl among servers ====="
-syncRepl=""
-for i in `seq 1 $vmCount`; do
-    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
-done
-
-sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
-ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
-
 # test replication
 # ldapmodify -Y EXTERNAL -H ldapi:/// -f config_7_testConfigReplication.ldif
 
@@ -144,6 +135,15 @@ if [ "$index" = "1" ]; then
     ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_7_addIndexHDB.ldif
 
 fi
+
+echo "===== Add syncRepl among servers ====="
+syncRepl=""
+for i in `seq 1 $vmCount`; do
+    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
+done
+
+sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
 
 echo "===== Restart Apache ====="
 apachectl restart

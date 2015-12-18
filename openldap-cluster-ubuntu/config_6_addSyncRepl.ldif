@@ -2,3 +2,6 @@ dn: olcDatabase={0}config,cn=config
 changetype: modify
 add: olcSyncRepl
 {syncRepl}
+-
+add: olcMirrorMode
+olcMirrorMode: TRUE
