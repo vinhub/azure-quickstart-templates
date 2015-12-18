@@ -1,4 +1,4 @@
 dn: olcDatabase={1}hdb,cn=config
 changetype: modify
 replace: olcSuffix
-olcSuffix: dc=local
+olcSuffix: {dn}
