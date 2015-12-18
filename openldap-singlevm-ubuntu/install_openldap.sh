@@ -1,6 +1,4 @@
 #!/bin/bash
-apt-get -y update
-apt-get install debconf
 
 # parameters
 adminpass=$1
@@ -11,7 +9,11 @@ organization=$4
 # variables
 domain=$subdomain.$location.cloudapp.azure.com
 
-# set up a silent install of slapd
+# install debconf
+apt-get -y update
+apt-get install debconf
+
+# silent install of slapd
 export DEBIAN_FRONTEND=noninteractive
 echo slapd slapd/password1 password $adminpass | debconf-set-selections
 echo slapd slapd/password2 password $adminpass | debconf-set-selections
@@ -26,6 +28,7 @@ echo slapd slapd/backend select HDB | debconf-set-selections
 
 apt-get -y install slapd ldap-utils
 
+# install phpldapadmin
 sudo apt-get -y install phpldapadmin
 
 # backup existing config.php file for phpldapadmin and create a new one
