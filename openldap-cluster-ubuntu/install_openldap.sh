@@ -71,7 +71,8 @@ echo "===== Modify slapd default configuration ====="
 sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\/\/ ldap:\/\/ldap$index.$subdomain.local\/\"/" /etc/default/slapd
 
 echo "===== Generate password ====="
-SLAPPASSWD=$(slappasswd -s $adminpass)
+# SLAPPASSWD=$(slappasswd -s $adminpass)
+SLAPPASSWD=$adminpass
 
 echo "===== Load syncProv module ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1_loadSyncProvModule.ldif
@@ -100,7 +101,7 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f config_5_addSyncProv.ldif
 echo "===== Add syncRepl among servers ====="
 syncRepl=""
 for i in `seq 1 $vmCount`; do
-    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=secret searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
+    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWD searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1\n"
 done
 
 sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
@@ -132,7 +133,7 @@ if [ "$index" = "1" ]; then
     echo "===== Add  syncRepl among servers ====="
     for i in `seq 1 $vmCount`; do
         let "rid=i+vmCount"
-        echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com\" bindmethod=simple credentials=secret searchbase=\"dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
+        echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com\" bindmethod=simple credentials=$SLAPPASSWD searchbase=\"dc=$subdomain,dc=$location,dc=cloudapp,dc=azure,dc=com\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
     done
 
     ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_5_addOlcSyncRepl.ldif
