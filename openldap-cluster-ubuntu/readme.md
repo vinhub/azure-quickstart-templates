@@ -1,11 +1,11 @@
 # Deploy OpenLDAP cluster on Ubuntu.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvinhub%2Fazure-quickstart-templates%2Foldap4%2Fopenldap-cluster-ubuntu%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvinhub%2Fazure-quickstart-templates%2Fmaster%2Fopenldap-cluster-ubuntu%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-This template deploys an OpenLDAP cluster on Ubuntu. It creates multiple Ubuntu VMs and does a silent install of OpenLDAP on them. Then it sets up N-way multi-master replication on them. After the deployment is successful, you can go to /phpldapadmin to start congfiguring OpenLDAP.
+This template deploys an OpenLDAP cluster on Ubuntu. It creates multiple Ubuntu VMs and does a silent install of OpenLDAP on them. Then it sets up N-way multi-master replication on them. After the deployment is successful, you can go to /phpldapadmin to start working with OpenLDAP.
 
 This template can instantiate up to 5 front end VM's. This number can be increased easily by copying and pasting the related parts of the template. 
 
 ## Port Details:
-The template opens HTTP port 80 for normal end user access on all the front end VM's. This port is then load-balanced using the load balancer.
+The template opens HTTP port 80 for web access and 389 for LDAP on all the front end VM's. These port are load-balanced using the load balancer.
 It also opens ports 2200 to 2204 on the load balancer which are mapped to port 22 for SSH admin access on the respective VM's.
