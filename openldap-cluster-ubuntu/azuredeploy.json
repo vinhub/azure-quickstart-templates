@@ -311,7 +311,7 @@
         ],
         "loadBalancingRules": [
           {
-            "name": "LBRule",
+            "name": "HTTPRule",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[variables('frontEndIPConfigID')]"
@@ -322,6 +322,26 @@
               "protocol": "tcp",
               "frontendPort": 80,
               "backendPort": 80,
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "loadDistribution": "SourceIP",
+              "probe": {
+                "id": "[variables('lbProbeID')]"
+              }
+            }
+          },
+          {
+            "name": "LDAPRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbPoolID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 389,
+              "backendPort": 389,
               "enableFloatingIP": false,
               "idleTimeoutInMinutes": 5,
               "loadDistribution": "SourceIP",
