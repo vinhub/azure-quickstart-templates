@@ -399,8 +399,7 @@
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',parameters('newStorageAccountName'))]",
         "[concat('Microsoft.Network/networkInterfaces/',concat(variables('nicName'),copyIndex()))]",
-        "[concat('Microsoft.Compute/availabilitySets/',variables('availabilitySetName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),'db','/extensions/newuserscript')]"
+        "[concat('Microsoft.Compute/availabilitySets/',variables('availabilitySetName'))]"
       ],
       "properties": {
         "availabilitySet": {
