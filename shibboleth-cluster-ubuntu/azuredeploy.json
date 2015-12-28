@@ -47,6 +47,20 @@
         "description": "Unique name that will be used to generate various other names including the name of the Public IP used to access the Virtual Machine."
       }
     },
+    "webVMCount": {
+        "type": "int",
+        "defaultValue": 2,
+        "allowedValues": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "metadata": {
+            "description": "Number of web front end VMs to create."
+        }
+    },
     "vmSize": {
       "type": "string",
       "defaultValue": "Standard_A0",
@@ -88,12 +102,19 @@
     "subnetPrefix": "10.0.0.0/24",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat(parameters('namePrefix'),'IP')]",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat(parameters('namePrefix'),'VM')]",
     "virtualNetworkName": "[concat(parameters('namePrefix'),'VNet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "availabilitySetName": "[concat(parameters('namePrefix'),'AvSet')]",
+    "lbName": "[concat(parameters('namePrefix'),'LB')]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontend')]",
+    "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
+    "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_shibboleth_idp.sh",
     "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-singlevm-ubuntu/', variables('installScriptName'))]",
     "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('namePrefix'), ' ', resourceGroup().location)]",
@@ -108,6 +129,13 @@
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       }
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('availabilitySetName')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[parameters('location')]",
+      "properties": {}
     },
     {
       "apiVersion": "[variables('apiVersion')]",
@@ -145,11 +173,11 @@
     {
       "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
+      "name": "[concat(variables('nicName'),copyIndex())]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -157,12 +185,207 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/Web-VM',copyindex())]"
+                },
+                {
+                  "id": "[concat(variables('lbID'),'/inboundNatRules/SSH-VM',copyindex())]"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "copy": {
+        "name": "networkInterfacesCopy",
+        "count": "[parameters('webVMCount')]"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[variables('lbName')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "location":"[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LoadBalancerFrontend",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPAddressID')]"
               }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "LoadBalancerBackend"
+          }
+        ],
+        "inboundNatRules": [
+          {
+            "name":"Web-VM0",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 8080,
+              "backendPort": 8080,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"SSH-VM0",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 2200,
+              "backendPort": 22,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"Web-VM1",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 8081,
+              "backendPort": 8080,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"SSH-VM1",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 2201,
+              "backendPort": 22,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"Web-VM2",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 8082,
+              "backendPort": 8080,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"SSH-VM2",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 2202,
+              "backendPort": 22,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"Web-VM3",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 8083,
+              "backendPort": 8080,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"SSH-VM3",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 2203,
+              "backendPort": 22,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"Web-VM4",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 8084,
+              "backendPort": 8080,
+              "enableFloatingIP": false
+            }
+          },
+          {
+            "name":"SSH-VM4",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id":"[variables('frontEndIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 2204,
+              "backendPort": 22,
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "LBRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbPoolID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "loadDistribution": "SourceIP",
+              "probe": {
+                "id": "[variables('lbProbeID')]"
+              }
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "tcpProbe",
+            "properties": {
+              "protocol": "tcp",
+              "port": 80,
+              "intervalInSeconds": "5",
+              "numberOfProbes": "2"
             }
           }
         ]
@@ -171,18 +394,23 @@
     {
       "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
+      "name": "[concat(variables('vmName'),copyIndex())]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('newStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',concat(variables('nicName'),copyIndex()))]",
+        "[concat('Microsoft.Compute/availabilitySets/',variables('availabilitySetName'))]",
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmName'),'db','/extensions/newuserscript')]"
       ],
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computername": "[variables('vmName')]",
+          "computername": "[concat(variables('vmName'),copyIndex())]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -196,7 +424,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),copyIndex(),'.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -205,19 +433,23 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('nicName'),copyIndex()))]"
             }
           ]
         }
+      },
+      "copy": {
+        "name": "virtualMachinesCopy",
+        "count": "[parameters('webVMCount')]"
       }
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmName'),'/newuserscript')]",
+      "name": "[concat(variables('vmName'),copyIndex(),'/newuserscript')]",
       "apiVersion": "[variables('apiVersion')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/',concat(variables('vmName'),copyIndex()))]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
@@ -227,10 +459,14 @@
           "fileUris": [
             "[variables('installScriptUri')]"
           ],
-          "protectedSettings": {
-            "commandToExecute": "[variables('installCommand')]"
-          }
+        },
+        "protectedSettings": {
+          "commandToExecute": "[variables('installCommand')]"
         }
+      },
+      "copy": {
+        "name": "extensionsCopy",
+        "count": "[parameters('webVMCount')]"
       }
     }
   ]
