@@ -323,7 +323,7 @@
             "name": "tcpProbe",
             "properties": {
               "protocol": "tcp",
-              "port": 80,
+              "port": 8443,
               "intervalInSeconds": "5",
               "numberOfProbes": "2"
             }
