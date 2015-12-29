@@ -236,18 +236,6 @@
         ],
         "inboundNatRules": [
           {
-            "name":"Web-VM0",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8080,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM0",
             "properties": {
               "frontendIPConfiguration": {
@@ -256,18 +244,6 @@
               "protocol": "tcp",
               "frontendPort": 2200,
               "backendPort": 22,
-              "enableFloatingIP": false
-            }
-          },
-          {
-            "name":"Web-VM1",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8081,
-              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -284,18 +260,6 @@
             }
           },
           {
-            "name":"Web-VM2",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8082,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM2",
             "properties": {
               "frontendIPConfiguration": {
@@ -308,18 +272,6 @@
             }
           },
           {
-            "name":"Web-VM3",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8083,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM3",
             "properties": {
               "frontendIPConfiguration": {
@@ -328,18 +280,6 @@
               "protocol": "tcp",
               "frontendPort": 2203,
               "backendPort": 22,
-              "enableFloatingIP": false
-            }
-          },
-          {
-            "name":"Web-VM4",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8084,
-              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
