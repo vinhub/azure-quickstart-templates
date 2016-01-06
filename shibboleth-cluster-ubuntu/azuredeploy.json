@@ -559,7 +559,7 @@
       "properties": {
         "securityRules": [
           {
-            "name": "HDFS.Web.UI",
+            "name": "MySQL",
             "properties": {
               "description": "Allows MySQL traffic",
               "protocol": "TCP",
