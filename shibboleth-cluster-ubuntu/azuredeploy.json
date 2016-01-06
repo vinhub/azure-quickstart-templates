@@ -571,6 +571,20 @@
               "priority": 1101,
               "direction": "Inbound"
             }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1201,
+              "direction": "Inbound"
+            }
           }
       	 ]
         }
