@@ -533,7 +533,7 @@
             "name": "HDFS.Web.UI",
             "properties": {
               "description": "Allows HDFS Web UI traffic",
-              "protocol": "Any",
+              "protocol": "TCP",
               "sourcePortRange": "*",
               "destinationPortRange": "50070",
               "sourceAddressPrefix": "*",
