@@ -614,7 +614,7 @@
           "commandToExecute": "[concat(variables('installBackendCommand'))]"
         }
       }
-    }
+    },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'),copyIndex(),'/newuserscript')]",
