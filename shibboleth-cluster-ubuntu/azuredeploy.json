@@ -543,6 +543,7 @@
               "direction": "Inbound"
             }
           }
+      	 ]
         }
 	  },
     {
@@ -607,7 +608,7 @@
         "settings": {
           "fileUris": [
             "[variables('installBackendScriptUri')]"
-          ],
+          ]
         },
         "protectedSettings": {
           "commandToExecute": "[concat(variables('installBackendCommand'))]"
