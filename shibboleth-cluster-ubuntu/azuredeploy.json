@@ -561,10 +561,10 @@
           {
             "name": "HDFS.Web.UI",
             "properties": {
-              "description": "Allows HDFS Web UI traffic",
+              "description": "Allows MySQL traffic",
               "protocol": "TCP",
               "sourcePortRange": "*",
-              "destinationPortRange": "50070",
+              "destinationPortRange": "3306",
               "sourceAddressPrefix": "*",
               "destinationAddressPrefix": "*",
               "access": "Allow",
