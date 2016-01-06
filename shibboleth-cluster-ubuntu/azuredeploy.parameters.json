@@ -17,6 +17,15 @@
     "namePrefix": {
       "value": "uniqueDNS"
     },
+    "mySqlPasswordForRootUser": {
+      "value": "password"
+    },
+    "mySqlUser": {
+      "value": "username"
+    },
+    "mySqlPasswordForUser": {
+      "value": "password"
+    },
     "vmSize": {
       "value": "Standard_A0"
     },
