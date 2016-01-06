@@ -139,10 +139,10 @@
     "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_shibboleth_idp.sh",
-    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-singlevm-ubuntu/', variables('installScriptName'))]",
+    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-cluster-ubuntu/', variables('installScriptName'))]",
     "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('namePrefix'), ' ', resourceGroup().location)]",
     "installBackendScriptName": "install_backend.sh",
-    "installBackendScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/moodle-cluster-ubuntu/', variables('installBackendScriptName'))]",
+    "installBackendScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-cluster-ubuntu/', variables('installBackendScriptName'))]",
     "installBackendCommand": "[concat('sh ', variables('installBackendScriptName'), ' ', parameters('mySqlPasswordForRootUser'), ' ', parameters('mySqlUser'), ' ', variables('mySqlPasswordForUser'))]",
     "apiVersion": "2015-06-15"
   },
