@@ -20,19 +20,19 @@
     "mySqlPasswordForRootUser": {
       "value": "password"
     },
-    "mySqlUser": {
+    "mySqlIdpUser": {
       "value": "username"
     },
-    "mySqlPasswordForUser": {
+    "mySqlPasswordForIdpUser": {
       "value": "password"
     },
-    "vmSize": {
+    "vmSizeFrontend": {
       "value": "Standard_A0"
     },
     "vmSizeDB": {
       "value": "Standard_A0"
     },
-    "webVMCount": {
+    "vmCountFrontend": {
         "value": 1
     }
   }
