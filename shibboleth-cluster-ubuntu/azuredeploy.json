@@ -228,7 +228,10 @@
           {
             "name": "[variables('subnetNameDB')]",
             "properties": {
-              "addressPrefix": "[variables('subnetPrefixDB')]"
+              "addressPrefix": "[variables('subnetPrefixDB')]",
+              "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('virtualNetworkName'), '-sg'))]"
+              }
             }
           }
         ]
