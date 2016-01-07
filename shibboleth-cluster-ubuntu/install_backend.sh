@@ -16,25 +16,11 @@ apt-get	install libmysql-java
 # Allow remote connection
 sed -i "s/bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
 
-#connect to db
-mysql -u root -p$mysqlpassword
-
 #create database
-create database idp_db;
+mysql -u root -p$mysqlpassword -e "create database idp_db";
 
-#select database
-use idp_db
-
-#create table
-CREATE TABLE StorageRecords(
-context varchar(255) NOT NULL,
-id varchar(255) NOT NULL,
-expires bigint(20) DEFAULT NULL,
-value longtext NOT NULL,
-version bigint(20) NOT NULL,
-PRIMARY	KEY	(context,id));
-
-exit;
+#create table 
+mysql -u root -p$mysqlpassword -e "use idp_db; create table StorageRecords(context varchar(255) NOT NULL,id varchar(255) NOT NULL,expires bigint(20) DEFAULT NULL,value longtext NOT NULL,version bigint(20) NOT NULL,PRIMARY KEY(context,id))";
 
 #create user & grant all privileges
 mysql -u root -p$mysqlpassword -e "create user $mySqlUser@'localhost' identified by '$mySqlPasswordForUser'";
