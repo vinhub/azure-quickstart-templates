@@ -532,7 +532,8 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/',variables('publicDBIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/',variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', concat(variables('virtualNetworkName'), '-sg'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -545,6 +546,9 @@
               },
               "subnet": {
                 "id": "[variables('subnetRefDB')]"
+              },
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('virtualNetworkName'), '-sg'))]"
               }
             }
           }
