@@ -53,19 +53,19 @@
         "description": "Password for the MySQL 'root' admin user."
       }
     },
-    "mySqlUser": {
+    "mySqlIdpUser": {
       "type": "string",
       "metadata": {
         "description": "User name that will be used to create user in MySQL database which has all privileges."
       }
     },
-    "mySqlPasswordForUser": {
+    "mySqlPasswordForIdpUser": {
       "type": "securestring",
       "metadata": {
-        "description": "Password for the MySQL user."
+        "description": "Password for the MySQL Idp user."
       }
     },
-    "webVMCount": {
+    "vmCountFrontend": {
         "type": "int",
         "defaultValue": 2,
         "allowedValues": [
@@ -79,7 +79,7 @@
             "description": "Number of web front end VMs to create."
         }
     },
-    "vmSize": {
+    "vmSizeFrontend": {
       "type": "string",
       "defaultValue": "Standard_A0",
       "allowedValues": [
@@ -169,10 +169,10 @@
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_shibboleth_idp.sh",
     "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-cluster-ubuntu/', variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', concat(parameters('namePrefix'),'db'), ' ', parameters('mySqlUser'), ' ', parameters('mySqlPasswordForUser'))]",
+    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', concat(parameters('namePrefix'),'db'), ' ', parameters('mySqlIdpUser'), ' ', parameters('mySqlPasswordForIdpUser'))]",
     "installBackendScriptName": "install_backend.sh",
     "installBackendScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-cluster-ubuntu/', variables('installBackendScriptName'))]",
-    "installBackendCommand": "[concat('sh ', variables('installBackendScriptName'), ' ', parameters('mySqlPasswordForRootUser'), ' ', parameters('mySqlUser'), ' ', parameters('mySqlPasswordForUser'))]",
+    "installBackendCommand": "[concat('sh ', variables('installBackendScriptName'), ' ', parameters('mySqlPasswordForRootUser'), ' ', parameters('mySqlIdpUser'), ' ', parameters('mySqlPasswordForIdpUser'))]",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -274,7 +274,7 @@
       },
       "copy": {
         "name": "networkInterfacesCopy",
-        "count": "[parameters('webVMCount')]"
+        "count": "[parameters('vmCountFrontend')]"
       }
     },
     {
@@ -473,7 +473,7 @@
           "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
         },
         "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
+          "vmSize": "[parameters('vmSizeFrontend')]"
         },
         "osProfile": {
           "computername": "[concat(variables('vmName'),copyIndex())]",
@@ -506,7 +506,7 @@
       },
       "copy": {
         "name": "virtualMachinesCopy",
-        "count": "[parameters('webVMCount')]"
+        "count": "[parameters('vmCountFrontend')]"
       }
     },
     {
@@ -688,7 +688,7 @@
       },
       "copy": {
         "name": "extensionsCopy",
-        "count": "[parameters('webVMCount')]"
+        "count": "[parameters('vmCountFrontend')]"
       }
     }
   ]
