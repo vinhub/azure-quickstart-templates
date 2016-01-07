@@ -161,7 +161,14 @@ sed -i -e "s~'::1/128'~'::1/128', '0.0.0.0/0'~g" /opt/shibboleth-idp/conf/access
 #add beans shibboleth.JPAStorageService, shibboleth.JPAStorageService.EntityManagerFactory, shibboleth.JPAStorageService.JPAVendorAdapter & shibboleth.JPAStorageService.DataSource
 sed -i -e 's~</beans>~<bean id=\"shibboleth.JPAStorageService\" class=\"org.opensaml.storage.impl.JPAStorageService\" p:cleanupInterval=\"%{idp.storage.cleanupInterval:PT10M}\" c:factory-ref=\"shibboleth.JPAStorageService.entityManagerFactory\" /> <bean id=\"shibboleth.JPAStorageService.entityManagerFactory\" class=\"org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean\"> <property name=\"packagesToScan\" value=\"org.opensaml.storage.impl\"/> <property name=\"dataSource\" ref=\"shibboleth.JPAStorageService.DataSource\"/> <property name=\"jpaVendorAdapter\" ref=\"shibboleth.JPAStorageService.JPAVendorAdapter\"/> <property name=\"jpaDialect\"> <bean class=\"org.springframework.orm.jpa.vendor.HibernateJpaDialect\" /> </property> </bean> <bean id=\"shibboleth.JPAStorageService.JPAVendorAdapter\" class=\"org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter\"> <property name=\"database\" value=\"MYSQL\" /> </bean> <bean	id=\"shibboleth.JPAStorageService.DataSource\" class=\"org.apache.tomcat.jdbc.pool.DataSource\" destroy-method=\"close\" lazy-init=\"true\" p:driverClassName=\"com.mysql.jdbc.Driver\" p:url=\"jdbc:mysql://'"$DBSITENAME"':3306/idp_db?autoReconnect=true\&amp;sessionVariables=wait_timeout=31536000\" p:validationQuery=\"SELECT 1;\" p:username=\"idp_admin\" p:password=\"IDP_ADMIN_PASSWORD\" /> </beans>~g' /opt/shibboleth-idp/conf/global.xml
 
+sed -i "s/#idp.session.StorageService.*/idp.session.StorageService = shibboleth.JPAStorageService/" /opt/shibboleth-idp/conf/idp.properties
+sed -i "s/#idp.consent.StorageService.*/idp.consent.StorageService = shibboleth.JPAStorageService/" /opt/shibboleth-idp/conf/idp.properties
+sed -i "s/#idp.replayCache.StorageService.*/idp.replayCache.StorageService = shibboleth.JPAStorageService/" /opt/shibboleth-idp/conf/idp.properties
+sed -i "s/#idp.artifact.StorageService.*/idp.artifact.StorageService = shibboleth.JPAStorageService/" /opt/shibboleth-idp/conf/idp.properties
 
+#add mysql-connector-java.jar in /tomcat7/lib
+cd /usr/share/tomcat7/lib
+wget http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar
 
 #restart tomcat
 service tomcat7 restart
