@@ -111,9 +111,11 @@
     "nicName": "[concat(parameters('namePrefix'),'Nic')]",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
-    "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.0.1.0/24",
+    "privateIPAddressPrefix": "10.0.1.1",
     "storageAccountType": "Standard_LRS",
     "publicIPAddressName": "[concat(parameters('namePrefix'),'IP')]",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
     "vmName": "[concat(parameters('namePrefix'),'VM')]",
@@ -127,8 +129,10 @@
     "lbProbeID": "[concat(variables('lbID'),'/probes/tcpProbe')]",
     "lbPoolID": "[concat(variables('lbID'),'/backendAddressPools/LoadBalancerBackend')]",
     "installScriptName": "install_openldap.sh",
-    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap2/openldap-singlevm-ubuntu/', variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization') ' ',  parameters('vmCount'))]",
+    "fileUriBase": "https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/openldap-cluster-ubuntu/",
+    "installScriptUri": "[concat(variables('fileUriBase'), variables('installScriptName'))]",
+    "installCommand": "[concat('bash ', variables('installScriptName'), ' ', parameters('vmAdminUsername'), ' ', parameters('vmAdminPassword'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'), ' ',
+      variables('privateIPAddressPrefix'), ' ', parameters('vmCount'))]",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -195,7 +199,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress" :"[concat(variables('privateIPAddressPrefix'), copyindex())]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               },
@@ -205,9 +210,6 @@
                 }
               ],
               "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('lbID'),'/inboundNatRules/Web-VM',copyindex())]"
-                },
                 {
                   "id": "[concat(variables('lbID'),'/inboundNatRules/SSH-VM',copyindex())]"
                 }
@@ -247,18 +249,6 @@
         ],
         "inboundNatRules": [
           {
-            "name":"Web-VM0",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8080,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM0",
             "properties": {
               "frontendIPConfiguration": {
@@ -267,18 +257,6 @@
               "protocol": "tcp",
               "frontendPort": 2200,
               "backendPort": 22,
-              "enableFloatingIP": false
-            }
-          },
-          {
-            "name":"Web-VM1",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8081,
-              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -295,18 +273,6 @@
             }
           },
           {
-            "name":"Web-VM2",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8082,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM2",
             "properties": {
               "frontendIPConfiguration": {
@@ -319,18 +285,6 @@
             }
           },
           {
-            "name":"Web-VM3",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8083,
-              "backendPort": 8080,
-              "enableFloatingIP": false
-            }
-          },
-          {
             "name":"SSH-VM3",
             "properties": {
               "frontendIPConfiguration": {
@@ -339,18 +293,6 @@
               "protocol": "tcp",
               "frontendPort": 2203,
               "backendPort": 22,
-              "enableFloatingIP": false
-            }
-          },
-          {
-            "name":"Web-VM4",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id":"[variables('frontEndIPConfigID')]"
-              },
-              "protocol": "tcp",
-              "frontendPort": 8084,
-              "backendPort": 8080,
               "enableFloatingIP": false
             }
           },
@@ -369,7 +311,7 @@
         ],
         "loadBalancingRules": [
           {
-            "name": "LBRule",
+            "name": "HTTPRule",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[variables('frontEndIPConfigID')]"
@@ -380,6 +322,46 @@
               "protocol": "tcp",
               "frontendPort": 80,
               "backendPort": 80,
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "loadDistribution": "SourceIP",
+              "probe": {
+                "id": "[variables('lbProbeID')]"
+              }
+            }
+          },
+          {
+            "name": "HTTPSRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbPoolID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 443,
+              "backendPort": 443,
+              "enableFloatingIP": false,
+              "idleTimeoutInMinutes": 5,
+              "loadDistribution": "SourceIP",
+              "probe": {
+                "id": "[variables('lbProbeID')]"
+              }
+            }
+          },
+          {
+            "name": "LDAPRule",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('frontEndIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbPoolID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 389,
+              "backendPort": 389,
               "enableFloatingIP": false,
               "idleTimeoutInMinutes": 5,
               "loadDistribution": "SourceIP",
@@ -421,8 +403,8 @@
         },
         "osProfile": {
           "computername": "[concat(variables('vmName'),copyIndex())]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -464,12 +446,31 @@
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
         "type": "CustomScriptForLinux",
-        "typeHandlerVersion": "1.2",
+        "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "[variables('installScriptUri')]"
+            "[variables('installScriptUri')]",
+            "[concat(variables('fileUriBase'), 'forceTLS.ldif')]",
+            "[concat(variables('fileUriBase'), 'setTLSConfig.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_1_loadSyncProvModule.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_2_setServerID.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_3_setConfigPW.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_3a_addOlcRootDN.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_4_addConfigReplication.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_5_addSyncProv.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_6_addSyncRepl.ldif')]",
+            "[concat(variables('fileUriBase'), 'config_7_testConfigReplication.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_1_addSyncProvToHDB.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_2_addOlcSuffix.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_3_addOlcRootDN.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_4_addOlcRootPW.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_5_addOlcSyncRepl.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_6_addOlcMirrorMode.ldif')]",
+            "[concat(variables('fileUriBase'), 'hdb_7_addIndexHDB.ldif')]"
           ],
-          "commandToExecute": "[variables('installCommand')]"
+        },
+        "protectedSettings": {
+          "commandToExecute": "[concat(variables('installCommand'), ' ', copyIndex())]"
         }
       },
       "copy": {

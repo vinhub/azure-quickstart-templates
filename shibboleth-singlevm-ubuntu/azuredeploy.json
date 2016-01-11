@@ -29,28 +29,16 @@
         "description": "Location of resources"
       }
     },
-    "vmAdminUsername": {
+    "adminUsername": {
       "type": "string",
       "metadata": {
         "description": "User name for the Virtual Machine administrator. Do not use simple names such as 'admin'."
       }
     },
-    "vmAdminPassword": {
+    "adminPassword": {
       "type": "securestring",
       "metadata": {
         "description": "Password for the Virtual Machine administrator."
-      }
-    },
-    "directoryAdminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Password for the OpenLDAP directory administrator."
-      }
-    },
-    "organization": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the organization for which the directory is being created."
       }
     },
     "namePrefix": {
@@ -106,10 +94,9 @@
     "virtualNetworkName": "[concat(parameters('namePrefix'),'VNet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "installScriptName": "install_openldap.sh",
-    "fileUriBase": "https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/oldap4/openldap-singlevm-ubuntu/",
-    "installScriptUri": "[concat(variables('fileUriBase'), variables('installScriptName'))]",
-    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('directoryAdminPassword'), ' ', parameters('namePrefix'), ' ', resourceGroup().location, ' ', parameters('organization'))]",
+    "installScriptName": "install_shibboleth_idp.sh",
+    "installScriptUri": "[concat('https://raw.githubusercontent.com/vinhub/azure-quickstart-templates/master/shibboleth-singlevm-ubuntu/', variables('installScriptName'))]",
+    "installCommand": "[concat('sh ', variables('installScriptName'), ' ', parameters('namePrefix'), ' ', resourceGroup().location)]",
     "apiVersion": "2015-06-15"
   },
   "resources": [
@@ -196,8 +183,8 @@
         },
         "osProfile": {
           "computername": "[variables('vmName')]",
-          "adminUsername": "[parameters('vmAdminUsername')]",
-          "adminPassword": "[parameters('vmAdminPassword')]"
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -238,13 +225,11 @@
         "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "[variables('installScriptUri')]",
-            "[concat(variables('fileUriBase'), 'forceTLS.ldif')]",
-            "[concat(variables('fileUriBase'), 'setTLSConfig.ldif')]"
+            "[variables('installScriptUri')]"
           ],
-        },
-        "protectedSettings": {
-          "commandToExecute": "[variables('installCommand')]"
+          "protectedSettings": {
+            "commandToExecute": "[variables('installCommand')]"
+          }
         }
       }
     }
