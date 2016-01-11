@@ -1,17 +1,26 @@
-# Deploy Shibboleth Identity Provider cluster on Ubuntu.
+# Deploy Shibboleth Identity Provider cluster on Ubuntu
 
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvinhub%2Fazure-quickstart-templates%2Fmaster%2Fshibboleth-cluster-ubuntu%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a>
 
-This template deploys Shibboleth Identity Provider on Ubuntu in a clustered configuration. It creates a one or more Ubuntu VM for the front end and a single VM for the backend. It does a silent install of Apache Tomcat and Open JDK on the front end VM's, and then deploys Shibboleth IDP on each of it and MySQL on the backend VM.  It configures a load balancer for directing requests to the front end VM's. It also configures NAT rules to allow admin access to each of the VM's. On back end VM's, it configure a database storage	using JPA. After the deployment is successful, you can go to /idp/profile/Status to check success. For further instructions, please refer to the Shibboleth IDP documentation at https://wiki.shibboleth.net/confluence/display/IDP30/Clustering.
+This template deploys Shibboleth Identity Provider on Ubuntu in a clustered configuration. It creates a one or more Ubuntu VM for the front end and a single VM for the backend. It does a silent install of Apache Tomcat and Open JDK on the front end VM's, and then deploys Shibboleth IDP on each of them. It also deploys MySQL on the backend VM.  It configures a load balancer for directing requests to the front end VM's. It also configures NAT rules to allow admin access to each of the VM's. On backend VM's, it configures the database using JPA. After the deployment is successful, you can go to /idp/profile/Status to check success. For further instructions, please refer to the Shibboleth IDP documentation at https://wiki.shibboleth.net/confluence/display/IDP30/Clustering.
+
+# Notes
+
+## Front End VM's:
+This template can instantiate up to 5 front end VM's. This number can be increased easily by copying and pasting the related parts of the template. 
+
+## Port Details:
+The template opens HTTP port 8443 for SSL front end access on all the front end VM's. This port is load-balanced using the load balancer.
+It also opens ports 2200 to 2204 on the load balancer which are mapped to port 22 for SSH admin access on the respective VM's.
 
 # Test Setup
 Here are the steps you can follow to create a testing setup including Shibboleth IDP deployed using this template, along with an OpenLDAP test server and a test SP available online.
 
-## Deploy Shibboleth IDP Cluster using this template.
+## Deploy Shibboleth IDP Cluster using this template
 
-Create a deployment of Shibboleth IDP Cluster using this template and SSH into the each front end VM's deployed.
+Create a deployment of Shibboleth IDP Cluster using this template and SSH into the each of the front end VM's deployed.
 
-## Update ldap.properties inside /opt/conf directory as per the LDAP configuration. 
+## Update ldap.properties inside /opt/conf directory as per the LDAP configuration.
 Following are the settings for Online LDAP Test Server installation hosted at http://www.forumsys.com/tutorials/integration-how-to/ldap/online-ldap-test-server/
 	- set idp.authn.LDAP.authenticator = bindSearchAuthenticator
 	- set idp.authn.LDAP.ldapURL = ldap://ldap.forumsys.com:389
@@ -23,7 +32,7 @@ Following are the settings for Online LDAP Test Server installation hosted at ht
 	- set idp.authn.LDAP.dnFormat = uid=%s,dc=example,dc=com
 	- Comment out idp.authn.LDAP.sslConfig & Comment out idp.authn.LDAP.trustCertificates as SSL is not used here
 
-## Create metadata xml file for service provider. 
+## Create metadata xml file for the service provider
 http://testshib.org is used as Service provider and Shibboleth is used as IDP.
 	- Download metadata file from - https://www.testshib.org/metadata/testshib-providers.xml inside /opt/conf directory
 	- Configure the metadata provider inside /opt/conf/metadata-providers.xml file as follows
@@ -77,8 +86,9 @@ http://testshib.org is used as Service provider and Shibboleth is used as IDP.
 	- idp.consent.userStorageKey
 	- idp.consent.userStorageKeyAttribute
 
-## Restart the servlet container - service tomcat7 restart
+## Restart the servlet container
+    - service tomcat7 restart
 	
-## Follow the steps on http://testshib.org to test the shibboleth installation as IDP
-
-## Log files for Shibboleth reside inside /opt/logs directory. The log files can be helpful to debug any issue that show up during login process.
+## Test your installation
+    - Follow the steps on http://testshib.org to test the shibboleth installation as IDP
+    - Log files for Shibboleth reside inside /opt/logs directory. The log files can be helpful for debugging any issues that show up during the login process.
