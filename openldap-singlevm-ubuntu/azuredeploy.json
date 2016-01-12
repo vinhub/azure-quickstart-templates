@@ -241,7 +241,7 @@
             "[variables('installScriptUri')]",
             "[concat(variables('fileUriBase'), 'forceTLS.ldif')]",
             "[concat(variables('fileUriBase'), 'setTLSConfig.ldif')]"
-          ],
+          ]
         },
         "protectedSettings": {
           "commandToExecute": "[variables('installCommand')]"
