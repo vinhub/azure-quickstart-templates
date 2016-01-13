@@ -166,7 +166,7 @@ sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
 
 echo "===== Set password ====="
-sed -i "s~{password}~$SLAPPASSWD~Bug" config_3_setConfigPW.ldif
+sed -i "s~{password}~$SLAPPASSWD~" config_3_setConfigPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
 
 echo "===== Add Root DN ====="
