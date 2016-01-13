@@ -59,7 +59,7 @@ if [ "$index" = "1" ]; then
     certtool --generate-privkey > /etc/ssl/slapd/cakey.pem
 
     echo "===== Create ca.info ====="
-    echo "cn = $localdomain" > /etc/ssl/slapd/ca.info
+    echo "cn = $domain" > /etc/ssl/slapd/ca.info
     echo "ca" >> /etc/ssl/slapd/ca.info
     echo "cert_signing_key" >> /etc/ssl/slapd/ca.info
 
