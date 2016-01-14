@@ -157,6 +157,7 @@ apt-get -y install ntp
 echo "===== Generate password ====="
 # SLAPPASSWD=$(slappasswd -s $directoryadminpass)
 SLAPPASSWD=$directoryadminpass
+SLAPPASSWDEscaped="$(sed 's/[&/\]/\\&/g' <<< "$SLAPPASSWD")"
 
 echo "===== Load syncProv module ====="
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1_loadSyncProvModule.ldif
@@ -166,7 +167,8 @@ sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
 
 echo "===== Set password ====="
-sed -i "s@{password}@$SLAPPASSWD@" config_3_setConfigPW.ldif
+
+sed -i "s@{password}@$SLAPPASSWDEscaped@" config_3_setConfigPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
 
 echo "===== Add Root DN ====="
@@ -188,12 +190,12 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f ./forceTLS.ldif
 echo "===== Add syncRepl among servers ====="
 syncRepl=""
 for i in `seq 1 $vmCount`; do
-    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWD searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1 starttls=critical tls_reqcert=demand\n"
+    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWDEscaped searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1 starttls=critical tls_reqcert=demand\n"
 done
 
 sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
 # ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
-ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f config_6_addSyncRepl.ldif
+ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f config_6_addSyncRepl.ldif
 
 # test replication
 # ldapmodify -Y EXTERNAL -H ldapi:/// -f config_7_testConfigReplication.ldif
@@ -205,39 +207,39 @@ if [ "$index" = "1" ]; then
 
     echo "===== Add syncProv to HDB ====="
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_1_addSyncProvToHDB.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_1_addSyncProvToHDB.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_1_addSyncProvToHDB.ldif
 
     echo "===== Add suffix ====="
     sed -i "s@{dn}@$base@" hdb_2_addOlcSuffix.ldif
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_2_addOlcSuffix.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_2_addOlcSuffix.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_2_addOlcSuffix.ldif
     
     echo "===== Add Root DN ====="
     sed -i "s@{dn}@$base@" hdb_3_addOlcRootDN.ldif
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_3_addOlcRootDN.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_3_addOlcRootDN.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_3_addOlcRootDN.ldif
     
     echo "===== Add Root password ====="
-    sed -i "s@{password}@$SLAPPASSWD@" hdb_4_addOlcRootPW.ldif
+    sed -i "s@{password}@$SLAPPASSWDEscaped@" hdb_4_addOlcRootPW.ldif
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_4_addOlcRootPW.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_4_addOlcRootPW.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_4_addOlcRootPW.ldif
     
     echo "===== Add  syncRepl among servers ====="
     for i in `seq 1 $vmCount`; do
         let "rid=i+vmCount"
-        echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,$base\" bindmethod=simple credentials=$SLAPPASSWD searchbase=\"$base\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
+        echo "olcSyncRepl: rid=10$rid provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,$base\" bindmethod=simple credentials=$SLAPPASSWDEscaped searchbase=\"$base\" type=refreshAndPersist interval=00:00:00:10 retry=\"5 5 300 5\" timeout=1" >> hdb_5_addOlcSyncRepl.ldif
     done
 
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_5_addOlcSyncRepl.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_5_addOlcSyncRepl.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_5_addOlcSyncRepl.ldif
     
     echo "===== Add mirror mode ====="
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_6_addOlcMirrorMode.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_6_addOlcMirrorMode.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_6_addOlcMirrorMode.ldif
     
     echo "===== Add index to the database ====="
     # ldapmodify -Y EXTERNAL -H ldapi:/// -f hdb_7_addIndexHDB.ldif
-    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f hdb_7_addIndexHDB.ldif
+    ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWDEscaped -f hdb_7_addIndexHDB.ldif
     
 fi
 
