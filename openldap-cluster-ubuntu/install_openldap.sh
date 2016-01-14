@@ -59,7 +59,7 @@ if [ "$index" = "1" ]; then
     certtool --generate-privkey > /etc/ssl/slapd/cakey.pem
 
     echo "===== Create ca.info ====="
-    echo "cn = $domain" > /etc/ssl/slapd/ca.info
+    echo "cn = $localdomain" > /etc/ssl/slapd/ca.info
     echo "ca" >> /etc/ssl/slapd/ca.info
     echo "cert_signing_key" >> /etc/ssl/slapd/ca.info
 
@@ -115,7 +115,7 @@ cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.old
 echo "BASE $base" > /etc/ldap/ldap.conf
 echo "ldap:// ldaps:// ldapi://" >> /etc/ldap/ldap.conf
 echo "TLS_CACERT /etc/ssl/slapd/cacert.pem" >> /etc/ldap/ldap.conf
-echo "TLS_REQCERT never" >> /etc/ldap/ldap.conf
+echo "TLS_REQCERT demand" >> /etc/ldap/ldap.conf
 
 echo "===== Install phpldapadmin ====="
 # Install phpldapadmin
@@ -166,7 +166,7 @@ sed -i "s/{serverID}/$index/" config_2_setServerID.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2_setServerID.ldif
 
 echo "===== Set password ====="
-sed -i "s~{password}~$SLAPPASSWD~" config_3_setConfigPW.ldif
+sed -i "s@{password}@$SLAPPASSWD@" config_3_setConfigPW.ldif
 ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3_setConfigPW.ldif
 
 echo "===== Add Root DN ====="
@@ -191,7 +191,7 @@ for i in `seq 1 $vmCount`; do
     syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWD searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1 starttls=critical tls_reqcert=demand\n"
 done
 
-sed -i "s~{syncRepl}~$syncRepl~" config_6_addSyncRepl.ldif
+sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
 # ldapmodify -Y EXTERNAL -H ldapi:/// -f config_6_addSyncRepl.ldif
 ldapmodify -ZZ -h $localdomain -D "cn=admin,cn=config" -w $SLAPPASSWD -f config_6_addSyncRepl.ldif
 
