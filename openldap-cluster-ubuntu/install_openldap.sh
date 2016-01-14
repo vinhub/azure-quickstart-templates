@@ -115,7 +115,7 @@ cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.old
 echo "BASE $base" > /etc/ldap/ldap.conf
 echo "ldap:// ldaps:// ldapi://" >> /etc/ldap/ldap.conf
 echo "TLS_CACERT /etc/ssl/slapd/cacert.pem" >> /etc/ldap/ldap.conf
-echo "TLS_REQCERT demand" >> /etc/ldap/ldap.conf
+echo "TLS_REQCERT never" >> /etc/ldap/ldap.conf
 
 echo "===== Install phpldapadmin ====="
 # Install phpldapadmin
