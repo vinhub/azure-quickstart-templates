@@ -48,7 +48,7 @@ for i in `seq 1 $vmCount`; do
 done
 
 echo "===== Modify slapd default configuration ====="
-sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\/\/ ldap:\/\/$localdomain\/\"/" /etc/default/slapd
+sed -i "s/SLAPD_SERVICES=\"ldap:\/\/\/ ldapi:\/\/\/\"/SLAPD_SERVICES=\"ldapi:\/\/\/ ldap:\/\/$localdomain\"/" /etc/default/slapd
 
 echo "===== Create dir for certificates ====="
 mkdir /etc/ssl/slapd
