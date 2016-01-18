@@ -190,7 +190,7 @@ ldapmodify -Y EXTERNAL -H ldapi:/// -f ./forceTLS.ldif
 echo "===== Add syncRepl among servers ====="
 syncRepl=""
 for i in `seq 1 $vmCount`; do
-    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWDEscaped searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1 starttls=critical tls_reqcert=demand\n"
+    syncRepl=$syncRepl"olcSyncRepl: rid=00$i provider=ldap://ldap$i.$subdomain.local binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$SLAPPASSWDEscaped searchbase=\"cn=config\" type=refreshAndPersist retry=\"5 5 300 5\" timeout=1 starttls=critical tls_reqcert=allow\n"
 done
 
 sed -i "s@{syncRepl}@$syncRepl@" config_6_addSyncRepl.ldif
