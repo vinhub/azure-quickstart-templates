@@ -4,6 +4,9 @@
 
 This template deploys Shibboleth Identity Provider on Ubuntu. It creates a single Ubuntu VM, does a silent install of Apache Tomcat and Open JDK on it, and then deploys Shibboleth IDP on it.  After the deployment is successful, you can go to /idp/profile/Status to check success. For further instructions, please refer to the Shibboleth IDP documentation at https://wiki.shibboleth.net/confluence/display/SHIB2/IdPInstall.
 
+## Certificate:
+In order to support SSL, this template creates a self signed certificate as a part of the installation script. This allows the template to be deployed without having to create your own certificate. In production deployments, you will need to create and use your own certificate instead of the self signed certificate.
+
 # Test Setup
 Here are the steps you can follow to create a testing setup including Shibboleth IDP deployed using this template, along with an OpenLDAP test server and a test SP available online.
 

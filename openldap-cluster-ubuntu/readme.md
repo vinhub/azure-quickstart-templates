@@ -9,3 +9,6 @@ This template can instantiate up to 5 front end VM's. This number can be increas
 ## Port Details:
 The template opens HTTP port 80 for web access and 389 for LDAP on all the front end VM's. These port are load-balanced using the load balancer.
 It also opens ports 2200 to 2204 on the load balancer which are mapped to port 22 for SSH admin access on the respective VM's.
+
+## Certificates:
+In order to support TLS, this template creates self signed certificates as a part of the installation script. This allows the template to be deployed without having to create your own certificates. In production deployments, you will need to create and use your own certificates instead of the self signed certificates.
